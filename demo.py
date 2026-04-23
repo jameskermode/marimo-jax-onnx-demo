@@ -199,6 +199,12 @@ def _(build_grid, n_points, np, time, widget, x_range):
     if widget.value.get("ready", False):
         widget.input_x = xs[:, 0].tolist()
         ys_flat = widget.value.get("output_y", [])
+        # Drop the previous inference's output if it's still in flight — the
+        # JS side hasn't yet processed our new input_x, so output_y is stale
+        # and mis-shaped relative to xs. This cell will rerun when output_y
+        # changes; until then the plot just skips the prediction line.
+        if len(ys_flat) != xs.shape[0]:
+            ys_flat = []
     else:
         ys_flat = []
     elapsed_ms = (time.perf_counter() - t0) * 1000.0
