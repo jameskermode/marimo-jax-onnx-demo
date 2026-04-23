@@ -1,0 +1,42 @@
+[project]
+name = "marimo-jax-onnx-demo"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = [
+    # Pinned <0.23 because 0.23 added a frontend "trust" check that rejects
+    # anywidget `_esm` modules loaded from `data:` URLs. Under Pyodide/WASM,
+    # marimo forces `virtual_file_storage=None`, so anywidget `_esm` ALWAYS
+    # comes through as a `data:` URL — meaning every custom anywidget in a
+    # WASM-exported notebook fails with "Refusing to load ... from untrusted
+    # URL". The monkey-patch `ctx.virtual_files_supported = True` lets us
+    # produce `@file/` URLs that pass the trust check, but there is no
+    # frontend bridge to fetch `@file/` URLs under WASM (they 404). Revisit
+    # the pin once marimo ships a Pyodide `@file/` bridge or an opt-in trust
+    # flag for inline ESM. Tracked upstream: <TODO: filed issue URL>.
+    #
+    # Security note: CVE-2026-39987 (pre-auth RCE in `/terminal/ws`) is
+    # fixed in 0.23.0 but ONLY affects `marimo edit` running a server. This
+    # repo's deployed artifact is a static HTML bundle (no marimo server at
+    # runtime); CI uses `marimo export html-wasm` (a CLI, not a server).
+    # Local dev must not bind `marimo edit` to 0.0.0.0 (default is 127.0.0.1).
+    "marimo<0.23",
+]
+
+[dependency-groups]
+train = [
+    "jax>=0.8.1",
+    "equinox",
+    "optax",
+    "jax2onnx>=0.9.0",
+    "onnxruntime",
+    "onnx",
+    "numpy",
+]
+dev = [
+    {include-group = "train"},
+    "pytest",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
