@@ -65,8 +65,9 @@ Pyodide/WASM, marimo forces `virtual_file_storage=None`, which makes every
 anywidget `_esm` come through as a `data:` URL — so every custom anywidget
 in a WASM-exported notebook breaks. This repo needs custom anywidgets to
 run `onnxruntime-web`, so we stay on 0.22 until marimo ships a frontend
-bridge for `@file/` URLs under WASM or an opt-in trust flag. See the
-comment block in `pyproject.toml`.
+bridge for `@file/` URLs under WASM or an opt-in trust flag. Upstream
+tracking issue: [marimo-team/marimo#9297](https://github.com/marimo-team/marimo/issues/9297).
+Background in the comment block in `pyproject.toml`.
 
 **Security implications of the pin.** marimo <=0.20.4 has a critical
 pre-auth RCE ([CVE-2026-39987 / GHSA-2679-6mx9-h9xc](https://github.com/marimo-team/marimo/security/advisories/GHSA-2679-6mx9-h9xc)),

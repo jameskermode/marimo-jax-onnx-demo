@@ -12,7 +12,8 @@ dependencies = [
     # produce `@file/` URLs that pass the trust check, but there is no
     # frontend bridge to fetch `@file/` URLs under WASM (they 404). Revisit
     # the pin once marimo ships a Pyodide `@file/` bridge or an opt-in trust
-    # flag for inline ESM. Tracked upstream: <TODO: filed issue URL>.
+    # flag for inline ESM. Tracked upstream:
+    # https://github.com/marimo-team/marimo/issues/9297
     #
     # Security note: CVE-2026-39987 (pre-auth RCE in `/terminal/ws`) is
     # fixed in 0.23.0 but ONLY affects `marimo edit` running a server. This
