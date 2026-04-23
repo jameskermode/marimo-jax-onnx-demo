@@ -3,7 +3,7 @@
 # dependencies = [
 #     "marimo",
 #     "numpy",
-#     "matplotlib",
+#     "plotly",
 #     "anywidget",
 #     "traitlets",
 # ]
@@ -52,8 +52,8 @@ def _():
 
     import anywidget
     import marimo as mo
-    import matplotlib.pyplot as plt
     import numpy as np
+    import plotly.graph_objects as go
     import traitlets
 
     # The helpers below are duplicated from module top-level because marimo's
@@ -78,10 +78,10 @@ def _():
     return (
         anywidget,
         build_grid,
+        go,
         load_training_data,
         mo,
         np,
-        plt,
         time,
         traitlets,
     )
@@ -215,18 +215,35 @@ def _(build_grid, n_points, np, time, widget, x_range):
 
 
 @app.cell
-def _(backend, elapsed_ms, np, plt, x_train, xs, y_train, ys):
-    fig, ax = plt.subplots(figsize=(7, 4))
-    ax.scatter(x_train[:, 0], y_train[:, 0], s=10, alpha=0.4, label="training data")
-    true_xs = np.linspace(float(xs.min() if xs.size else -1), float(xs.max() if xs.size else 1), 400)
-    ax.plot(true_xs, np.sin(true_xs), linestyle="--", color="grey", label="sin(x)")
+def _(backend, elapsed_ms, go, np, x_train, xs, y_train, ys):
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(
+        x=x_train[:, 0], y=y_train[:, 0], mode="markers",
+        marker=dict(size=6, opacity=0.4), name="training data",
+    ))
+    true_xs = np.linspace(
+        float(xs.min() if xs.size else -1),
+        float(xs.max() if xs.size else 1),
+        400,
+    )
+    fig.add_trace(go.Scatter(
+        x=true_xs, y=np.sin(true_xs), mode="lines",
+        line=dict(dash="dash", color="grey"), name="sin(x)",
+    ))
     if ys.size:
-        ax.plot(xs[:, 0], ys[:, 0], color="C1", label="ONNX prediction")
-    ax.set_xlabel("x")
-    ax.set_ylabel("y")
-    ax.set_title(f"backend: {backend}   |   round-trip: {elapsed_ms:.1f} ms")
-    ax.legend(loc="lower left")
-    ax.grid(alpha=0.3)
+        fig.add_trace(go.Scatter(
+            x=xs[:, 0], y=ys[:, 0], mode="lines",
+            line=dict(color="#ff7f0e", width=2), name="ONNX prediction",
+        ))
+    fig.update_layout(
+        title=f"backend: {backend}   |   round-trip: {elapsed_ms:.1f} ms",
+        xaxis_title="x", yaxis_title="y",
+        height=420, margin=dict(l=40, r=20, t=40, b=40),
+        legend=dict(x=0.02, y=0.02),
+        # Stable axes so the line smoothly updates instead of the plot bouncing.
+        xaxis=dict(range=[-10, 10]),
+        yaxis=dict(range=[-1.5, 1.5]),
+    )
     fig
     return
 
